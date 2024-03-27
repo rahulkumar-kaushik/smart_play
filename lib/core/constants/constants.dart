@@ -15,6 +15,8 @@ class AppStrings {
   static const String pastRewards = "Past Rewards";
   static const String keepPlaying = "Keep playing your favourite SmartPlay games";
   static const String thanksForPlaying = "Thanks for playing!\nYour loyalty points are worth:";
+  static const String yourCashPoint = "Your cash points";
+  static const String bonusPoint = "Bonus points";
 
   static const String gameThumbnailPath = 'assets/images/reward_bg.png';
 }

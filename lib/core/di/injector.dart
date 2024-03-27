@@ -5,6 +5,7 @@ import 'package:just_play/features/cashout/data/repositoryImpl/userlist_repo_imp
 import 'package:just_play/features/cashout/domain/repositories/user_repository.dart';
 import 'package:just_play/features/cashout/domain/usecases/get_user_list_usecase.dart';
 import 'package:just_play/features/cashout/presentation/bloc/userlist_bloc.dart';
+import 'package:just_play/features/home/presentation/bloc/home_bloc.dart';
 
 import '../../features/cashout/data/datasources/category_datasource.dart';
 import '../../features/cashout/data/repositoryImpl/category_repository_impl.dart';
@@ -61,4 +62,9 @@ void init() {
 
   // Bloc
   sl.registerFactory(() => UserListBloc(getUserListUseCase: sl()));
+
+  // ================================================================
+  // Features - Lpa Data
+
+  sl.registerFactory(() => HomeBloc(getUserListUseCase: sl()));
 }

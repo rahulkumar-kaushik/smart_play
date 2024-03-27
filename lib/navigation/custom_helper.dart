@@ -6,7 +6,6 @@ import '../features/home/presentation/pages/screens/about_page.dart';
 import '../features/home/presentation/pages/screens/donate_page.dart';
 import '../features/home/presentation/pages/screens/home_page.dart';
 import '../features/home/presentation/pages/screens/rewards_page.dart';
-import 'bottom_navigation.dart';
 
 class CustomNavigationHelper {
   static final CustomNavigationHelper _instance =
@@ -131,14 +130,29 @@ class CustomNavigationHelper {
           StatefulNavigationShell navigationShell,
         ) {
           return getPage(
+            child: const JustPlayApp(),
+            state: state,
+          );
+        },
+      ),
+      /*
+
+      // Bottom Navigation Bar
+      pageBuilder: (
+          BuildContext context,
+          GoRouterState state,
+          StatefulNavigationShell navigationShell,
+        ) {
+          return getPage(
             child: BottomNavigationPage(
               child: navigationShell,
             ),
             state: state,
           );
         },
-      ),
-      /*GoRoute(
+
+
+      GoRoute(
         parentNavigatorKey: parentNavigatorKey,
         path: signUpPath,
         pageBuilder: (context, state) {

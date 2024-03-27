@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:just_play/core/constants/constants.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:just_play/common/colors.dart';
+import 'package:just_play/features/home/presentation/bloc/home_bloc.dart';
+import 'package:just_play/features/home/presentation/bloc/states/home_state.dart';
+import 'package:just_play/features/home/presentation/widgets/gamelistitem.dart';
 import 'package:just_play/features/home/presentation/widgets/top_view.dart';
+
+import '../../../../../common/app_constant.dart';
+import '../../bloc/events/home_event.dart';
+
+part "../../widgets/home_widgets.dart";
 
 class JustPlayApp extends StatelessWidget {
   const JustPlayApp({super.key});
@@ -19,9 +28,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
-  int lpaPoints = 0;
-  int totalPoints = 1000;
-
   @override
   void initState() {
     super.initState();
@@ -54,56 +60,34 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: Column(
-      children: [
-        Container(
-            decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.white, Colors.deepPurpleAccent])),
-            child: Column(children: [
-              Center(
-                  child: Image.asset(
-                'assets/images/justplay.png',
-                height: 80,
-                width: 130,
+    return BlocBuilder<HomeBloc, UserListState>(builder: (context, state) {
+      if (state is UserListLoaded) {
+        lpaPoints = state.userEntities.length + lpaPoints;
+      }
+      return Scaffold(
+          appBar: PreferredSize(
+              preferredSize: const Size.fromHeight(0),
+              child: AppBar(
+                backgroundColor: AppColors.backgroundColor,
               )),
-              progressView(context, lpaPoints, totalPoints),
-            ])),
-        const SizedBox(
-          height: 10,
-        ),
-        const Text(
-          "${AppStrings.keepPlaying}!",
-          style: TextStyle(
-              fontWeight: FontWeight.bold, fontSize: 14, color: Colors.indigo),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Center(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(25),
-              child: SizedBox.fromSize(
-                size: const Size.fromRadius(144),
-                child: Image.asset(
-                  AppStrings.gameThumbnailPath,
-                  height: 250,
-                  width: 150,
-                  fit: BoxFit.cover,
+          backgroundColor: AppColors.backgroundColor,
+          body: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                topMenu(),
+                progressView(context, lpaPoints, totalPoints, state),
+                const SizedBox(
+                  height: 10,
                 ),
-              ),
+                const GameListItem(),
+              ],
             ),
-          ),
-        )
-      ],
-    ));
+          ));
+    });
   }
 
   void _updateLpaPoints() {
-    setState(() {
-      lpaPoints += 100;
-    });
+    BlocProvider.of<HomeBloc>(context).add(FetchLpaData());
   }
 }

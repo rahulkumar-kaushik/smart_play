@@ -9,17 +9,29 @@ import 'package:flutter_udid/flutter_udid.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:just_play/features/cashout/presentation/bloc/events/userlist_event.dart';
 import 'package:just_play/features/cashout/presentation/bloc/userlist_bloc.dart';
+import 'package:just_play/features/onboarding/intro_screen.dart';
 import 'package:just_play/navigation/custom_helper.dart';
+import 'package:just_play/utils/shared_pref_utils.dart';
 
+import 'common/app_bloc.dart';
 import 'common/app_constant.dart';
 import 'core/di/injector.dart';
+import 'features/home/presentation/bloc/events/home_event.dart';
+import 'features/home/presentation/bloc/home_bloc.dart';
+
+/* Separate files of main */
+part '../../features/onboarding/splash_screen.dart';
 
 Future<void> main() async {
   CustomNavigationHelper.instance;
   init();
+  Bloc.observer = AppBlocObserver();
   runApp(MultiBlocProvider(providers: [
     BlocProvider(
       create: (_) => sl<UserListBloc>()..add(FetchUsers()),
+    ),
+    BlocProvider(
+      create: (_) => sl<HomeBloc>()..add(FetchLpaData()),
     )
   ], child: const MyApp()));
 }
@@ -37,6 +49,7 @@ class _MyApp extends State<MyApp> {
     super.initState();
     initPlatformState();
     initCleverTap();
+    SharedPrefsUtils.init();
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -63,74 +76,15 @@ class _MyApp extends State<MyApp> {
   }
 }
 
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
-
-  @override
-  State<SplashScreen> createState() => _SplashScreen();
-}
-
-class _SplashScreen extends State<SplashScreen> {
-  bool serviceStatus = false;
-  bool hasPermission = false;
-  late LocationPermission permission;
-  late Position position;
-  String long = "", lat = "";
-
-  @override
-  void initState() {
-    checkGps();
-    checkConnectivity();
-    super.initState();
-
-    Timer(const Duration(seconds: 5), () {
-      isConnected
-          ? Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) => const NavScreen()))
-          : _showNetworkErrorDialog(context);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-            gradient: LinearGradient(
-                begin: Alignment.topRight,
-                end: Alignment.bottomLeft,
-                colors: [Colors.lightBlueAccent, Colors.blue])),
-        child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Image.asset(
-                'assets/images/justplay.png',
-                height: 80,
-                width: 130,
-                color: Colors.white,
-              ),
-            ]),
-      ),
-    );
-  }
-
-  checkGps() async {
-    serviceStatus = await Geolocator.isLocationServiceEnabled();
-    if (serviceStatus) {
-      permission = await Geolocator.checkPermission();
-    }
-  }
-}
-
-checkConnectivity() async {
+checkConnectivity(BuildContext context) async {
   final connectivityResult = await Connectivity().checkConnectivity();
-  if (connectivityResult != ConnectivityResult.none) {
-    isConnected = true;
-  } else {
+  print("Connected: $connectivityResult");
+  if (connectivityResult[0] == ConnectivityResult.none) {
     isConnected = false;
+    _showNetworkErrorDialog(context);
+  } else {
+    isConnected = true;
+    _goNext(context);
   }
 }
 
@@ -169,7 +123,8 @@ _showNetworkErrorDialog(BuildContext context) {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      checkConnectivity();
+                      Navigator.of(context).pop();
+                      checkConnectivity(context);
                     },
                     style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
